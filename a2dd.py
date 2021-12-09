@@ -48,6 +48,10 @@ class AnsibleTask:
             ruamel.yaml.comments.CommentedMap: DirectorD task with comments
         """
         task_module = get_task_action(self.task)
+        # Let's assume task names are unique in all collections we use
+        # Remove collection part of it
+        if "." in task_module:
+            task_module = task_module.split(".")[-1]
         if task_module in ("block", "include", "include_tasks"):
             raise ValueError(
                 f"Can not parse module {task_module} - "
