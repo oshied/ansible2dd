@@ -1,0 +1,11 @@
+[MESSAGES CONTROL]
+; C0114: Missing module docstring (missing-module-docstring)
+; C0103: Variable name "t" doesn't conform to snake_case naming style (invalid-name)
+; R0903 Too few public methods
+; R0904 Too many public methods
+; R0914 Too many local variables
+; R0912 Too many branches
+; R0915 Too many statements
+; R0913 Too many arguments
+; R0923: Interface not implemented
+disable=R,C0114,C0103
