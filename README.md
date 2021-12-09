@@ -2,4 +2,6 @@
 
 Ansible to DirectorD tasks conversion
 
-Run script as: `python3 ./a2dd.py ansible_playbook.yml > dd-orchestration.yaml`
+Install the tool: `pip install -r requirements.txt; pip install .`
+
+Run the tool as: ` \a2dd ansible_playbook.yml > dd-orchestration.yaml`
