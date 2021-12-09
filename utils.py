@@ -1,4 +1,3 @@
-# noqa: D100
 import ruamel.yaml
 
 from constants import TASK_ATTRS

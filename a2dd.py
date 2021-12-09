@@ -1,4 +1,3 @@
-# noqa: D100
 #   Copyright Sagi Shnaidman <sshnaidm@redhat.com>. All Rights Reserved.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,8 +13,6 @@
 #   under the License.
 
 import argparse
-
-import yaml
 from ruamel.yaml.comments import CommentedMap as Map
 
 from constants import BLOCK_ATTRS, PLAYBOOK_ATTRS, TASK_ATTRS
@@ -385,7 +382,7 @@ def parse_file(file_path):
     """
     result = []
     with open(file_path, "r", encoding="utf-8") as f:
-        ansible_file = yaml.safe_load(f)
+        ansible_file = yaml_load(f)
         if isinstance(ansible_file, list):
             for i in ansible_file:
                 if "hosts" in i:

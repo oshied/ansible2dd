@@ -1,4 +1,3 @@
-# noqa: D100
 TASK_ATTRS = [
     "action",
     "any_errors_fatal",
