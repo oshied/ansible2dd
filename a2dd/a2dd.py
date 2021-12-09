@@ -12,11 +12,10 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
-import argparse
 from ruamel.yaml.comments import CommentedMap as Map
 
-from constants import BLOCK_ATTRS, PLAYBOOK_ATTRS, TASK_ATTRS
-from utils import get_task_action, yaml_dump, yaml_load
+from a2dd.constants import BLOCK_ATTRS, PLAYBOOK_ATTRS, TASK_ATTRS
+from a2dd.utils import get_task_action, yaml_dump, yaml_load
 
 
 class AnsibleTask:
@@ -399,25 +398,3 @@ def parse_file(file_path):
         if isinstance(ansible_file, dict):
             result.append(vars_parse(ansible_file))
     return result
-
-
-def main():
-    """Run script standalone."""
-    parser = argparse.ArgumentParser(__doc__)
-
-    parser.add_argument(
-        "-r", "--role", dest="role", help="Path to Ansible role"
-    )
-    parser.add_argument(
-        "-f", "--file", dest="file", help="Path to Ansible file"
-    )
-    args = parser.parse_args()
-
-    if args.role:
-        print(yaml_dump(role_parse(role_path=args.role)))
-    if args.file:
-        print(yaml_dump(parse_file(args.file)))
-
-
-if __name__ == "__main__":
-    main()

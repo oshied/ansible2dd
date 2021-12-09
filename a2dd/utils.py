@@ -1,6 +1,6 @@
 import ruamel.yaml
 
-from constants import TASK_ATTRS
+from a2dd.constants import TASK_ATTRS
 
 
 class NewDumper(ruamel.yaml.RoundTripDumper):
