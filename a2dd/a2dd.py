@@ -153,6 +153,22 @@ class AnsibleTask:
         """
         return self.task_shell(task_args)
 
+    def task_set_fact(self, task_args):
+        """Parse set_fact task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        args = []
+        for arg in list(self.task["set_fact"].items()):
+            if arg[0] != "cacheable":
+                args.append({"ARG": f'{arg[0]} "{arg[1]}"'})
+        return args, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""
