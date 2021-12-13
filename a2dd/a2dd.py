@@ -44,7 +44,7 @@ class AnsibleTask:
             ValueError: if task is block or include
 
         Returns:
-            ruamel.yaml.comments.CommentedMap: DirectorD task with comments
+            list: List of DirectorD tasks with comments as ruamel Maps
         """
         task_module = get_task_action(self.task)
         # Let's assume task names are unique in all collections we use
@@ -61,26 +61,31 @@ class AnsibleTask:
             k: v for k, v in self.task.items() if k not in parsed_attrs
         }
         name = self.task.get("name", "Unnamed task")
-        result_task = Map({"NAME": name})
 
         func_name = "task_" + task_module
+        tasks_parsed = []
         if not hasattr(self, func_name):
             task_context = yaml_dump(self.task)
-            task_parsed = Map(
-                {
-                    "ECHO": (
-                        "Conversion of task module {task_module} is not "
-                        "implemented yet!"
-                    )
-                }
-            )
+            tasks_parsed = [
+                Map(
+                    {
+                        "NAME": name,
+                        "ECHO": (
+                            "Conversion of task module {task_module} is not "
+                            "implemented yet!"
+                        ),
+                    }
+                )
+            ]
         else:
-            task_parsed, task_context = getattr(self, func_name)(task_args)
-            if task_parsed:
-                task_parsed = Map(task_parsed)
+            parsed, task_context = getattr(self, func_name)(task_args)
+            if parsed:
+                for each_task in parsed:
+                    named_task = {"NAME": name}  # for NAME to be on the top
+                    named_task.update(each_task)
+                    tasks_parsed.append(Map(named_task))
             if task_context:
                 task_context = yaml_dump(task_context)
-        result_task.update(task_parsed)
 
         context = ""
         if task_context:
@@ -90,8 +95,9 @@ class AnsibleTask:
                 context = "\n".join([add_context["context"], context])
         context = f"\n{context}"
         if context:
-            result_task.yaml_set_start_comment(context)
-        return result_task
+            for task in tasks_parsed:
+                task.yaml_set_start_comment(context)
+        return tasks_parsed
 
     def task_shell(self, task_args):
         """Parse shell task.
@@ -103,7 +109,8 @@ class AnsibleTask:
             ValueError: if shell command is not found in task
 
         Returns:
-            tuple: (dict, list) : DirectorD task with comments (unparsed)
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
         """
         exe = []
         action = "shell" if "shell" in self.task else "command"
@@ -129,7 +136,7 @@ class AnsibleTask:
         # Not parsed lines go to task-context for future implementation
         for i in ("environment", "chdir", "name", "args"):
             task_args.pop(i, None)
-        return {"RUN": "\n".join(exe)}, task_args
+        return [{"RUN": "\n".join(exe)}], task_args
 
     def task_command(self, task_args):
         """Parse command task.
@@ -141,7 +148,8 @@ class AnsibleTask:
             ValueError: if command is not found in task
 
         Returns:
-            tuple: (dict, list) : DirectorD task with comments (unparsed)
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
         """
         return self.task_shell(task_args)
 
@@ -281,7 +289,7 @@ class AnsibleTasksList:
                 result.extend(incl.parse())
             else:
                 task_repr = AnsibleTask(task, **self.kwargs)
-                result.append(task_repr.parse())
+                result.extend(task_repr.parse())
         return result
 
 
