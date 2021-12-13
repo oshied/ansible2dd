@@ -76,6 +76,8 @@ class AnsibleTask:
             )
         else:
             task_parsed, task_context = getattr(self, func_name)(task_args)
+            if task_parsed:
+                task_parsed = Map(task_parsed)
             if task_context:
                 task_context = yaml_dump(task_context)
         result_task.update(task_parsed)
@@ -101,7 +103,7 @@ class AnsibleTask:
             ValueError: if shell command is not found in task
 
         Returns:
-            ruamel.yaml.comments.CommentedMap: DirectorD task with comments
+            tuple: (dict, list) : DirectorD task with comments (unparsed)
         """
         exe = []
         action = "shell" if "shell" in self.task else "command"
@@ -127,7 +129,7 @@ class AnsibleTask:
         # Not parsed lines go to task-context for future implementation
         for i in ("environment", "chdir", "name", "args"):
             task_args.pop(i, None)
-        return Map({"RUN": "\n".join(exe)}), task_args
+        return {"RUN": "\n".join(exe)}, task_args
 
     def task_command(self, task_args):
         """Parse command task.
@@ -139,7 +141,7 @@ class AnsibleTask:
             ValueError: if command is not found in task
 
         Returns:
-            ruamel.yaml.comments.CommentedMap: DirectorD task with comments
+            tuple: (dict, list) : DirectorD task with comments (unparsed)
         """
         return self.task_shell(task_args)
 
