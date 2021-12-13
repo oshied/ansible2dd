@@ -71,8 +71,8 @@ class AnsibleTask:
                     {
                         "NAME": name,
                         "ECHO": (
-                            "Conversion of task module {task_module} is not "
-                            "implemented yet!"
+                            f"Conversion of task module '{task_module}' is not"
+                            " implemented yet!"
                         ),
                     }
                 )
