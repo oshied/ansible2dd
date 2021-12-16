@@ -300,7 +300,11 @@ class AnsibleTasksList:
             if "block" in task:
                 block = AnsibleBlock(task, **self.kwargs)
                 result.extend(block.parse())
-            elif "include" in task or "include_tasks" in task:
+            elif (
+                "include" in task
+                or "include_tasks" in task
+                or "import_tasks" in task
+            ):
                 incl = AnsibleIncludeTasks(task, **self.kwargs)
                 result.extend(incl.parse())
             else:
