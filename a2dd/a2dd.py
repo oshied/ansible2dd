@@ -198,6 +198,20 @@ class AnsibleTask:
         dnf = [{"DNF": " ".join(args + pkgs)}]
         return dnf, task_args
 
+    def task_setup(self, task_args):
+        """Parse setup task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        # We don't have filters now, just run facter for all
+        setup = [{"FACTER": ""}]
+        return setup, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""
@@ -393,6 +407,15 @@ class AnsiblePlay:
                         }
                     )
                 )
+        if self.playbook.get("gather_facts", False):
+            play_result.append(
+                Map(
+                    {
+                        "NAME": "Gather facts for playbook",
+                        "FACTER": "",
+                    }
+                )
+            )
         self.playbook["context"] = self.add_context()
         targets = self.playbook["hosts"]
         if targets != "all":
