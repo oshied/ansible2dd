@@ -169,6 +169,35 @@ class AnsibleTask:
                 args.append({"ARG": f'{arg[0]} "{arg[1]}"'})
         return args, task_args
 
+    def task_dnf(self, task_args):
+        """Parse dnf task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        args = []
+        pkgs = self.task["dnf"]["name"]
+        state = self.task["dnf"].get("state", "present")
+        if pkgs == "*" and state == "latest":
+            return [{"RUN": "dnf update -y"}], task_args
+
+        if isinstance(pkgs, str):
+            pkgs = [pkgs]
+        if state == "latest":
+            args.append("--latest")
+        elif state == "absent":
+            args.append("--absent")
+
+        for k, v in self.task["dnf"].items():
+            if k not in ("name", "state"):
+                raise ValueError(f"Not implemented key in dnf task: {k}: {v}")
+        dnf = [{"DNF": " ".join(args + pkgs)}]
+        return dnf, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""
