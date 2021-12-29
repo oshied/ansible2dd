@@ -1,0 +1,31 @@
+name: Run pull-request functional tests
+on:
+  - pull_request
+
+jobs:
+  functional:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9]
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip tox
+    - name: Install a2dd module
+      run: |
+        python -m pip install -r requirements.txt .
+
+    - name: Run tests for components
+      run: |
+        for component in $(ls tests/*.yaml); do
+          file=$(basename $component)
+          a2dd -f $component > /tmp/$file;
+          diff -bB tests/results/$file /tmp/$file;
+        done

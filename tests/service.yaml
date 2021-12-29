@@ -1,0 +1,16 @@
+- name: Reload service httpd and enable it
+  ansible.builtin.service:
+    name: httpd
+    state: reloaded
+    enabled: yes
+
+- name: Restart service httpd
+  ansible.builtin.service:
+    name: httpd
+    state: restarted
+
+- name: Start service foo and enable it
+  service:
+    name: foo
+    state: started
+    enabled: true
