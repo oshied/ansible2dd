@@ -507,9 +507,8 @@ def parse_file(file_path):
                     play = AnsiblePlay(i)
                     result.append(play.parse())
                 else:
-                    for task in ansible_file:
-                        t = AnsibleTask(task)
-                        result.append(t.parse())
+                    t = AnsibleTask(i)
+                    result.extend(t.parse())
         if isinstance(ansible_file, dict):
             result.append(vars_parse(ansible_file))
     return result
