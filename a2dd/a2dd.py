@@ -214,6 +214,37 @@ class AnsibleTask:
         setup = [{"FACTER": ""}]
         return setup, task_args
 
+    def task_service(self, task_args):
+        """Parse service task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        servargs = []
+        names = self.task["service"]["name"]
+        if isinstance(names, str):
+            names = [names]
+        state = self.task["service"].get("state")
+        if state is not None:
+            if state == "stopped":
+                servargs.append("--stopped")
+            elif state == "restarted":
+                servargs.append("--restarted")
+            elif state == "reloaded":
+                servargs.append("--reloaded")
+        enabled = self.task["service"].get("enabled")
+        if enabled is not None:
+            if enabled:
+                servargs.append("--enable")
+            else:
+                servargs.append("--disable")
+        service = [{"SERVICE": " ".join(servargs + names)}]
+        return service, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""
