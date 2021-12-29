@@ -1,0 +1,10 @@
+
+- NAME: Reload service httpd and enable it
+  SERVICE: --reloaded --enable httpd
+
+- NAME: Restart service httpd
+  SERVICE: --restarted httpd
+
+- NAME: Start service foo and enable it
+  SERVICE: --enable foo
+
