@@ -50,7 +50,9 @@ class AnsibleTask:
         # Let's assume task names are unique in all collections we use
         # Remove collection part of it
         if "." in task_module:
-            task_module = task_module.split(".")[-1]
+            new_task_module = task_module.split(".")[-1]
+            self.task[new_task_module] = self.task.pop(task_module)
+            task_module = new_task_module
         if task_module in ("block", "include", "include_tasks"):
             raise ValueError(
                 f"Can not parse module {task_module} - "
