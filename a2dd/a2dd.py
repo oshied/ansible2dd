@@ -271,6 +271,12 @@ class AnsibleTask:
                 servargs.append("--enable")
             else:
                 servargs.append("--disable")
+        masked = self.task["systemd"].get("masked")
+        if masked is not None:
+            if masked:
+                servargs.append("--mask")
+            else:
+                servargs.append("--unmask")
         reload = self.task["systemd"].get(
             "daemon_reload", self.task["systemd"].get("daemon-reload")
         )
