@@ -42,7 +42,9 @@ def yaml_dump(content):
 
 def yaml_load(stringg):
     """Load a ruamel.yaml object (dictionary) from string."""
-    return ruamel.yaml.load(stringg, ruamel.yaml.RoundTripLoader)
+    return ruamel.yaml.load(
+        stringg, ruamel.yaml.RoundTripLoader, version=(1, 1)
+    )
 
 
 def add_comment(ruamel_obj, comment):

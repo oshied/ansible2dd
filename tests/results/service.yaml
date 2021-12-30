@@ -8,3 +8,6 @@
 - NAME: Start service foo and enable it
   SERVICE: --enable foo
 
+- NAME: Start service bar and disable it
+  SERVICE: --disable foo
+

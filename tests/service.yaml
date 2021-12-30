@@ -14,3 +14,9 @@
     name: foo
     state: started
     enabled: true
+
+- name: Start service bar and disable it
+  service:
+    name: foo
+    state: started
+    enabled: no
