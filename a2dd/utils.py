@@ -77,3 +77,13 @@ def get_task_action(task):
     if len(action) == 0:
         raise Exception(f"Can't get action from task: {task}")
     return list(action)[0]
+
+
+def string2dict(x_string):
+    """Convert a string to a dictionary."""
+    try:
+        new_dict = dict(k.split("=") for k in x_string.split())
+    except Exception as e:
+        print(f"Can't convert string to dict: {x_string}")
+        raise e
+    return yaml_load(yaml_dump(new_dict))

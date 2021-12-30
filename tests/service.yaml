@@ -20,3 +20,6 @@
     name: foo
     state: started
     enabled: no
+
+- name: Stop multipathd on the host
+  service: name=multipathd state=stopped enabled=no

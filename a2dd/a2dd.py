@@ -15,7 +15,7 @@
 from ruamel.yaml.comments import CommentedMap as Map
 
 from a2dd.constants import BLOCK_ATTRS, PLAYBOOK_ATTRS, TASK_ATTRS
-from a2dd.utils import get_task_action, yaml_dump, yaml_load
+from a2dd.utils import get_task_action, yaml_dump, yaml_load, string2dict
 
 
 class AnsibleTask:
@@ -53,6 +53,8 @@ class AnsibleTask:
             new_task_module = task_module.split(".")[-1]
             self.task[new_task_module] = self.task.pop(task_module)
             task_module = new_task_module
+        if isinstance(self.task[task_module], str):
+            self.task[task_module] = string2dict(self.task[task_module])
         if task_module in ("block", "include", "include_tasks"):
             raise ValueError(
                 f"Can not parse module {task_module} - "
