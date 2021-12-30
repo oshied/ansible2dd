@@ -34,7 +34,7 @@
     enabled: no
     state: stopped
     masked: yes
-    daemon_reload: yes
+    daemon-reload: yes
 
 - name: get haproxy status
   systemd:
