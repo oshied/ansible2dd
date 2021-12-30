@@ -245,6 +245,40 @@ class AnsibleTask:
         service = [{"SERVICE": " ".join(servargs + names)}]
         return service, task_args
 
+    def task_systemd(self, task_args):
+        """Parse service task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        servargs = []
+        name = self.task["systemd"]["name"]
+        state = self.task["systemd"].get("state")
+        if state is not None:
+            if state == "stopped":
+                servargs.append("--stopped")
+            elif state == "restarted":
+                servargs.append("--restarted")
+            elif state == "reloaded":
+                servargs.append("--reloaded")
+        enabled = self.task["systemd"].get("enabled")
+        if enabled is not None:
+            if enabled:
+                servargs.append("--enable")
+            else:
+                servargs.append("--disable")
+        reload = self.task["systemd"].get(
+            "daemon_reload", self.task["systemd"].get("daemon-reload")
+        )
+        if reload:
+            servargs.append("--daemon-reload")
+        service = [{"SERVICE": " ".join(servargs + [name])}]
+        return service, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""
