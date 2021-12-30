@@ -1,0 +1,22 @@
+
+- NAME: Restart service cron on centos pick up config changes
+  SERVICE: --restarted --daemon-reload crond
+
+- NAME: Enable service httpd and ensure it is not masked
+  SERVICE: --disable httpd
+
+- NAME: Enable a timer unit for dnf-automatic
+  SERVICE: --enable dnf-automatic.timer
+
+- NAME: Run a user service when XDG_RUNTIME_DIR is not set on remote login
+  SERVICE: myservice
+
+- NAME: libvirt-guests enable VM shutdown on compute reboot/shutdown
+  SERVICE: --enable --daemon-reload libvirt-guests
+
+- NAME: make sure default libvirt-guests is disabled
+  SERVICE: --stopped --disable --daemon-reload libvirt-guests
+
+- NAME: get haproxy status
+  SERVICE: haproxy
+

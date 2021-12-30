@@ -1,0 +1,41 @@
+- name: Restart service cron on centos pick up config changes
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: yes
+    name: crond
+
+- name: Enable service httpd and ensure it is not masked
+  systemd:
+    name: httpd
+    enabled: false
+    masked: no
+
+- name: Enable a timer unit for dnf-automatic
+  ansible.builtin.systemd:
+    name: dnf-automatic.timer
+    state: started
+    enabled: yes
+
+- name: Run a user service when XDG_RUNTIME_DIR is not set on remote login
+  systemd:
+    name: myservice
+    state: started
+
+- name: libvirt-guests enable VM shutdown on compute reboot/shutdown
+  systemd:
+    name: libvirt-guests
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: make sure default libvirt-guests is disabled
+  systemd:
+    name: libvirt-guests
+    enabled: no
+    state: stopped
+    masked: yes
+    daemon_reload: yes
+
+- name: get haproxy status
+  systemd:
+    name: haproxy
