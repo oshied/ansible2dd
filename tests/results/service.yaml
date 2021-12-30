@@ -11,3 +11,6 @@
 - NAME: Start service bar and disable it
   SERVICE: --disable foo
 
+- NAME: Stop multipathd on the host
+  SERVICE: --stopped --disable multipathd
+
