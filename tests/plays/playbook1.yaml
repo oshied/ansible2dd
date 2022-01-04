@@ -1,0 +1,142 @@
+---
+- hosts: all
+  gather_facts: true
+  vars:
+    someplaybook: value
+    playvar2: value2
+
+  tasks:
+
+    - name: copy new lvm.conf in place
+      become: true
+      copy:
+        remote_src: true
+        src: /tmp/tripleo_lvmfilter.conf
+        dest: /etc/lvm/lvm.conf
+        owner: root
+        group: root
+        mode: '0644'
+        backup: true
+
+    - name: make sure default libvirt-guests is disabled
+      systemd:
+        name: libvirt-guests
+        enabled: no
+        state: stopped
+        masked: yes
+        daemon-reload: yes
+
+    - when:
+        - condition1
+        - "{{ myboolean | bool }}"
+      become: true
+      environment:
+        BLOCK_VAR: somevalue
+      block:
+        - name: Stop multipathd on the host
+          service: name=multipathd state=stopped enabled=no
+
+        - name: Restart service httpd
+          ansible.builtin.service:
+            name: httpd
+            state: restarted
+
+        - name: Enable service httpd and ensure it is not masked
+          systemd:
+            name: httpd
+            enabled: false
+            masked: no
+
+    - name: Set multiple facts
+      set_fact:
+        anothervar: true
+        something: 1123
+        othervar: "{{ razraz | default('unknown') }}"
+        packages2install:
+          - rpm-build
+          - chrony
+          - quepasa
+        cacheable: true
+
+    - name: Install dnsmasq and bind-utils
+      package:
+        name: "{{ packages }}"
+        state: present
+      vars:
+        packages:
+          - dnsmasq
+          - bind-utils
+
+    - name: Run tripleo_os_net_config_module with network_config
+      tripleo_os_net_config:
+        config_file: "{{ nic_config_file }}"
+        debug: "{{ tripleo_network_config_debug|bool }}"
+        detailed_exit_codes: true
+        safe_defaults: "{{ tripleo_network_config_safe_defaults | bool }}"
+      async: "{{ tripleo_network_config_async_timeout }}"
+      poll: "{{ tripleo_network_config_async_poll }}"
+      register: NetworkConfig_result
+      when: not ansible_check_mode
+
+- hosts: undercloud
+  gather_facts: false
+  become: true
+  tasks:
+
+    - copy:
+        src: "{{ source_file }}"
+        backup: true
+        dest: "{{ output_env_file }}"
+
+    -  set_fact:
+        varia: 12345
+
+    - name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+      ini_file:
+        path: /etc/NetworkManager/NetworkManager.conf
+        state: present
+        no_extra_spaces: true
+        section: main
+        option: dns
+        value: none
+        backup: true
+
+    - become: false
+      block:
+
+        - name: Reload NetworkManager
+          service:
+            name: NetworkManager
+            state: reloaded
+
+        - name: Copy files with backup
+          copy:
+            remote_src: yes
+            src: /home/{{ tripleo_admin_user }}/.ssh/id_rsa
+            dest: /var/lib/mistral/.ssh/{{ tripleo_admin_user }}-rsa
+            mode: 0600
+            backup: true
+
+    - name: Image-Serve | restart httpd
+      systemd:
+        name: httpd
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      when:
+        - (tripleo_image_serve_pkg_result.changed or
+          tripleo_image_serve_httpd_config_result.changed or
+          tripleo_image_serve_config_result.changed)
+
+    - name: Add listen line
+      lineinfile:
+        path: /etc/httpd/conf/httpd.conf
+        regexp: '^\s*Listen(.*)$'
+        line: '# Listen \1'
+      register: tripleo_image_serve_httpd_config_result
+
+    - name: manage /etc/httpd/conf.d/image-serve.conf
+      template:
+        src: image-serve.conf.j2
+        dest: /etc/httpd/conf.d/image-serve.conf
+      register: tripleo_image_serve_config_result
