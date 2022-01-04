@@ -1,42 +1,40 @@
 - jobs:
+  - NAME: Set playbook arg value for someplaybook
+    ARG: someplaybook value
+  - NAME: Set playbook arg value for playvar2
+    ARG: playvar2 value2
   - NAME: Gather facts for playbook
     FACTER: ''
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
 # become: true
   - NAME: copy new lvm.conf in place
     RUN: cp -r /tmp/tripleo_lvmfilter.conf /etc/lvm/lvm.conf.backup
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
 # become: true
   - NAME: copy new lvm.conf in place
     RUN: cp -r /tmp/tripleo_lvmfilter.conf /etc/lvm/lvm.conf
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
 # become: true
   - NAME: copy new lvm.conf in place
     RUN: chown -R root:root /etc/lvm/lvm.conf
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
 # become: true
   - NAME: copy new lvm.conf in place
     RUN: chmod -R 0644 /etc/lvm/lvm.conf
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
   - NAME: make sure default libvirt-guests is disabled
     SERVICE: --stopped --disable --mask --daemon-reload libvirt-guests
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 ## BLOCK-CONTEXT:
 # when: ['condition1', '{{ myboolean | bool }}']
 # become: True
@@ -44,7 +42,6 @@
     SERVICE: --stopped --disable multipathd
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 ## BLOCK-CONTEXT:
 # when: ['condition1', '{{ myboolean | bool }}']
 # become: True
@@ -52,7 +49,6 @@
     SERVICE: --restarted httpd
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 ## BLOCK-CONTEXT:
 # when: ['condition1', '{{ myboolean | bool }}']
 # become: True
@@ -60,27 +56,22 @@
     SERVICE: --disable --unmask httpd
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
   - NAME: Set multiple facts
     ARG: anothervar "True"
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
   - NAME: Set multiple facts
     ARG: something "1123"
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
   - NAME: Set multiple facts
     ARG: othervar "{{ razraz | default('unknown') }}"
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
   - NAME: Set multiple facts
     ARG: packages2install "['rpm-build', 'chrony', 'quepasa']"
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
 # vars:
 #   packages:
@@ -91,7 +82,6 @@
     DNF: '{{ packages }}'
 
 ## PLAYBOOK-CONTEXT:
-# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
 # name: Run tripleo_os_net_config_module with network_config
 # tripleo_os_net_config:
