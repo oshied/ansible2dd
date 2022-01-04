@@ -287,6 +287,87 @@ class AnsibleTask:
         service = [{"SERVICE": " ".join(servargs + [name])}]
         return service, task_args
 
+    def task_copy(self, task_args):
+        """Parse copy task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        copyargs = []
+        dest = self.task["copy"]["dest"]
+        src = self.task["copy"].get("src")
+        force = self.task["copy"].get("force", True)
+        mode = self.task["copy"].get("mode")
+        if isinstance(mode, str):
+            mode = int(mode, 8)
+        owner = self.task["copy"].get("owner")
+        group = self.task["copy"].get("group")
+        selevel = self.task["copy"].get("selevel")
+        setype = self.task["copy"].get("setype")
+        backup = self.task["copy"].get("backup")
+        if backup:
+            backup = "backup"
+        content = self.task["copy"].get("content")
+        if content:
+            raise NotImplementedError(
+                "Content in copy task is not supported yet"
+            )
+        if mode:
+            copyargs.append(f"--chmod 0{mode:o}")
+
+        if owner and group:
+            copyargs.append(f"--chown {owner}:{group}")
+        elif owner or group:
+            copyargs.append(f"--chown {owner or group}")
+
+        if self.task["copy"].get("remote_src"):
+            if src:
+                copy = [{"RUN": f"cp -r {src} {dest}"}]
+                if owner or group:
+                    owner_group = (
+                        f"{owner}:{group}"
+                        if (owner and group)
+                        else owner or group
+                    )
+                    copy.append({"RUN": f"chown -R {owner_group} {dest}"})
+                if mode:
+                    copy.append({"RUN": f"chmod -R 0{mode:o} {dest}"})
+                if backup:
+                    copy = [{"RUN": f"cp -r {src} {dest}.{backup}"}] + copy
+
+            else:
+
+                if not content:
+                    raise ValueError("No src or content in copy task")
+                raise NotImplementedError(
+                    "Content in copy task is not supported yet"
+                )
+
+        else:
+            if src:
+                if not force:
+                    raise NotImplementedError("Force is not implemented yet")
+                copy = [{"COPY": " ".join(copyargs + [src, dest])}]
+                if backup:
+                    copy = [
+                        {
+                            "COPY": " ".join(
+                                copyargs + [src, f"{dest}.{backup}"]
+                            )
+                        }
+                    ] + copy
+            else:
+                if not content:
+                    raise ValueError("No src or content in copy task")
+
+        if selevel or setype:
+            pass
+        return copy, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""

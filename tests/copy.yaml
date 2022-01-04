@@ -1,0 +1,91 @@
+- name: configure tmpwatch on the host
+  copy:
+    dest: /etc/config
+    src: /tmp/source
+
+- name: configure tmpwatch on the host
+  copy:
+    dest: /etc/config2
+    src: /tmp/source2
+
+- name: configure tmpwatch on the host
+  copy:
+    dest: /etc/config3
+    src: /tmp/source3
+    mode: 0600
+
+- name: configure tmpwatch on the host
+  copy:
+    dest: /etc/config4
+    src: /tmp/source4
+    mode: 0644
+    owner: someuser
+
+- name: configure tmpwatch on the host
+  copy:
+    dest: /etc/config5
+    src: /tmp/source5
+    owner: someuser
+    group: othergroup
+
+- name: configure tmpwatch on the host
+  copy:
+    dest: /etc/config6
+    src: /tmp/source6
+    owner: nonroot
+    group: root
+    mode: 0777
+
+- name: Copy files
+  copy:
+    remote_src: yes
+    src: /home/{{ tripleo_admin_user }}/.ssh/id_rsa
+    dest: /var/lib/mistral/.ssh/{{ tripleo_admin_user }}-rsa
+    mode: 0600
+
+- name: Copy aide db
+  copy:
+    src: "{{ aide_db_temp_path }}"
+    dest: "{{ aide_db_path }}"
+    remote_src: true
+
+- name: copy new lvm.conf in place
+  copy:
+    remote_src: true
+    src: /tmp/tripleo_lvmfilter.conf
+    dest: /etc/lvm/lvm.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+
+# - name: generate playbook to run
+#   copy:
+#     dest: "{{thales_rfs_playbook}}"
+#     content: |
+#       ---
+#       - hosts: all
+#         remote_user: "{{thales_rfs_user}}"
+#         vars:
+#           thales_configure_rfs: true
+#           thales_client_ips: "{{thales_client_ips}}"
+#           thales_hsm_ip_address: "{{thales_hsm_ip_address}}"
+#           thales_hsm_config_location: "{{thales_hsm_config_location}}"
+#           thales_bootstrap_client_ip: "{{thales_bootstrap_client_ip}}"
+#         roles:
+#           - thales-hsm
+
+# - name: configure tmpwatch on the host
+#   copy:
+#     dest: /etc/cron.daily/containers-tmpwatch
+#     owner: root
+#     group: root
+#     mode: 0755
+#     content: |
+#       #!/bin/sh
+#       tmpwatch --nodirs \
+#         -X "/var/log/containers/*/*log" \
+#         -X "/var/log/containers/*/*/*log" \
+#         -X "/var/log/containers/*/*err" \
+#         {{ LogrotatePurgeAfterDays|int +1 }}d \
+#         /var/log/containers/ 2>&1 | logger -t container-tmpwatch

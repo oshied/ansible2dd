@@ -1,0 +1,41 @@
+
+- NAME: configure tmpwatch on the host
+  COPY: /tmp/source /etc/config
+
+- NAME: configure tmpwatch on the host
+  COPY: /tmp/source2 /etc/config2
+
+- NAME: configure tmpwatch on the host
+  COPY: --chmod 0600 /tmp/source3 /etc/config3
+
+- NAME: configure tmpwatch on the host
+  COPY: --chmod 0644 --chown someuser /tmp/source4 /etc/config4
+
+- NAME: configure tmpwatch on the host
+  COPY: --chown someuser:othergroup /tmp/source5 /etc/config5
+
+- NAME: configure tmpwatch on the host
+  COPY: --chmod 0777 --chown nonroot:root /tmp/source6 /etc/config6
+
+- NAME: Copy files
+  RUN: cp -r /home/{{ tripleo_admin_user }}/.ssh/id_rsa /var/lib/mistral/.ssh/{{ tripleo_admin_user
+    }}-rsa
+
+- NAME: Copy files
+  RUN: chmod -R 0600 /var/lib/mistral/.ssh/{{ tripleo_admin_user }}-rsa
+
+- NAME: Copy aide db
+  RUN: cp -r {{ aide_db_temp_path }} {{ aide_db_path }}
+
+- NAME: copy new lvm.conf in place
+  RUN: cp -r /tmp/tripleo_lvmfilter.conf /etc/lvm/lvm.conf.backup
+
+- NAME: copy new lvm.conf in place
+  RUN: cp -r /tmp/tripleo_lvmfilter.conf /etc/lvm/lvm.conf
+
+- NAME: copy new lvm.conf in place
+  RUN: chown -R root:root /etc/lvm/lvm.conf
+
+- NAME: copy new lvm.conf in place
+  RUN: chmod -R 0644 /etc/lvm/lvm.conf
+
