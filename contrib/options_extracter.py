@@ -102,7 +102,7 @@ def get_task_options(task):
 
 def task_stats_print(task, result, output):
     """Print task stats."""
-    str_result = "\n".join(result)
+    str_result = "\n".join(sorted(result))
     if output == "-":
         print(str_result)
     else:
