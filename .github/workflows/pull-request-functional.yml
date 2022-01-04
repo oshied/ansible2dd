@@ -29,3 +29,11 @@ jobs:
           a2dd -f $component > /tmp/$file;
           diff -bB tests/results/$file /tmp/$file;
         done
+
+    - name: Run tests for playbooks
+      run: |
+        for play in $(ls tests/plays/*.yaml); do
+          file=$(basename $play)
+          a2dd -f $play > /tmp/$file;
+          diff -bB tests/results/$file /tmp/$file;
+        done

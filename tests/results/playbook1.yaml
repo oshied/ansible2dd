@@ -1,0 +1,207 @@
+- jobs:
+  - NAME: Gather facts for playbook
+    FACTER: ''
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+# TASK-CONTEXT:
+# become: true
+  - NAME: copy new lvm.conf in place
+    RUN: cp -r /tmp/tripleo_lvmfilter.conf /etc/lvm/lvm.conf.backup
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+# TASK-CONTEXT:
+# become: true
+  - NAME: copy new lvm.conf in place
+    RUN: cp -r /tmp/tripleo_lvmfilter.conf /etc/lvm/lvm.conf
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+# TASK-CONTEXT:
+# become: true
+  - NAME: copy new lvm.conf in place
+    RUN: chown -R root:root /etc/lvm/lvm.conf
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+# TASK-CONTEXT:
+# become: true
+  - NAME: copy new lvm.conf in place
+    RUN: chmod -R 0644 /etc/lvm/lvm.conf
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+  - NAME: make sure default libvirt-guests is disabled
+    SERVICE: --stopped --disable --mask --daemon-reload libvirt-guests
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+## BLOCK-CONTEXT:
+# when: ['condition1', '{{ myboolean | bool }}']
+# become: True
+  - NAME: Stop multipathd on the host
+    SERVICE: --stopped --disable multipathd
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+## BLOCK-CONTEXT:
+# when: ['condition1', '{{ myboolean | bool }}']
+# become: True
+  - NAME: Restart service httpd
+    SERVICE: --restarted httpd
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+## BLOCK-CONTEXT:
+# when: ['condition1', '{{ myboolean | bool }}']
+# become: True
+  - NAME: Enable service httpd and ensure it is not masked
+    SERVICE: --disable --unmask httpd
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+  - NAME: Set multiple facts
+    ARG: anothervar "True"
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+  - NAME: Set multiple facts
+    ARG: something "1123"
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+  - NAME: Set multiple facts
+    ARG: othervar "{{ razraz | default('unknown') }}"
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+  - NAME: Set multiple facts
+    ARG: packages2install "['rpm-build', 'chrony', 'quepasa']"
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+# TASK-CONTEXT:
+# name: Install dnsmasq and bind-utils
+# package:
+#   name: '{{ packages }}'
+#   state: present
+# vars:
+#   packages:
+#   - dnsmasq
+#   - bind-utils
+
+  - NAME: Install dnsmasq and bind-utils
+    ECHO: Conversion of task module 'package' is not implemented yet!
+
+## PLAYBOOK-CONTEXT:
+# vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
+# TASK-CONTEXT:
+# name: Run tripleo_os_net_config_module with network_config
+# tripleo_os_net_config:
+#   config_file: '{{ nic_config_file }}'
+#   debug: '{{ tripleo_network_config_debug|bool }}'
+#   detailed_exit_codes: true
+#   safe_defaults: '{{ tripleo_network_config_safe_defaults | bool }}'
+# async: '{{ tripleo_network_config_async_timeout }}'
+# poll: '{{ tripleo_network_config_async_poll }}'
+# register: NetworkConfig_result
+# when: not ansible_check_mode
+  - NAME: Run tripleo_os_net_config_module with network_config
+    ECHO: Conversion of task module 'tripleo_os_net_config' is not implemented yet!
+- targets: undercloud
+  jobs:
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Unnamed task
+    COPY: '{{ source_file }} {{ output_env_file }}.backup'
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Unnamed task
+    COPY: '{{ source_file }} {{ output_env_file }}'
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Unnamed task
+    ARG: varia "12345"
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# name: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+# ini_file:
+#   path: /etc/NetworkManager/NetworkManager.conf
+#   state: present
+#   no_extra_spaces: true
+#   section: main
+#   option: dns
+#   value: none
+#   backup: true
+  - NAME: Set 'dns=none' in /etc/NetworkManager/NetworkManager.conf
+    ECHO: Conversion of task module 'ini_file' is not implemented yet!
+
+## PLAYBOOK-CONTEXT:
+# become: True
+## BLOCK-CONTEXT:
+# become: False
+  - NAME: Reload NetworkManager
+    SERVICE: --reloaded NetworkManager
+
+## PLAYBOOK-CONTEXT:
+# become: True
+## BLOCK-CONTEXT:
+# become: False
+  - NAME: Copy files with backup
+    RUN: cp -r /home/{{ tripleo_admin_user }}/.ssh/id_rsa /var/lib/mistral/.ssh/{{
+      tripleo_admin_user }}-rsa.backup
+
+## PLAYBOOK-CONTEXT:
+# become: True
+## BLOCK-CONTEXT:
+# become: False
+  - NAME: Copy files with backup
+    RUN: cp -r /home/{{ tripleo_admin_user }}/.ssh/id_rsa /var/lib/mistral/.ssh/{{
+      tripleo_admin_user }}-rsa
+
+## PLAYBOOK-CONTEXT:
+# become: True
+## BLOCK-CONTEXT:
+# become: False
+  - NAME: Copy files with backup
+    RUN: chmod -R 0600 /var/lib/mistral/.ssh/{{ tripleo_admin_user }}-rsa
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# when:
+# - (tripleo_image_serve_pkg_result.changed or tripleo_image_serve_httpd_config_result.changed
+#   or tripleo_image_serve_config_result.changed)
+
+  - NAME: Image-Serve | restart httpd
+    SERVICE: --restarted --enable --daemon-reload httpd
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# name: Add listen line
+# lineinfile:
+#   path: /etc/httpd/conf/httpd.conf
+#   regexp: ^\s*Listen(.*)$
+#   line: '# Listen \1'
+# register: tripleo_image_serve_httpd_config_result
+  - NAME: Add listen line
+    ECHO: Conversion of task module 'lineinfile' is not implemented yet!
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# name: manage /etc/httpd/conf.d/image-serve.conf
+# template:
+#   src: image-serve.conf.j2
+#   dest: /etc/httpd/conf.d/image-serve.conf
+# register: tripleo_image_serve_config_result
+  - NAME: manage /etc/httpd/conf.d/image-serve.conf
+    ECHO: Conversion of task module 'template' is not implemented yet!
+
