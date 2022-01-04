@@ -1,0 +1,19 @@
+
+- NAME: install tmpwatch on the host
+  DNF: tmpwatch
+
+- NAME: make sure package presents
+  DNF: qemu-kvm-common kvm
+
+- NAME: Unnamed task
+  DNF: --absent openstack-nova-compute python-nova
+
+- NAME: Ensure packages required
+  DNF: python2-neutronclient python2-openstackclient openssl
+
+- NAME: Ensure Aide is installed and updated
+  DNF: --latest {{ aide_system_packages }}
+
+- NAME: Remove tripleo-repos
+  DNF: --absent python*tripleo-repos
+

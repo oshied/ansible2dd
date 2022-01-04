@@ -184,8 +184,25 @@ class AnsibleTask:
                                   list of unparsed lines as comments.
         """
         args = []
-        pkgs = self.task["dnf"]["name"]
-        state = self.task["dnf"].get("state", "present")
+        states_map = {
+            "installed": "present",
+            "present": "present",
+            "absent": "absent",
+            "removed": "absent",
+            "latest": "latest",
+        }
+        for act in ("yum", "dnf", "package"):
+            if act in self.task:
+                task = self.task[act]
+                break
+        else:
+            raise ValueError(f"Can not get action from: {self.task}")
+        pkgs = task["name"]
+        state = task.get("state", "present")
+        state = states_map.get(state, state)
+        for k, v in task.items():
+            if k not in ("name", "state"):
+                raise ValueError(f"Not implemented key in dnf task: {k}: {v}")
         if pkgs == "*" and state == "latest":
             return [{"RUN": "dnf update -y"}], task_args
 
@@ -196,11 +213,32 @@ class AnsibleTask:
         elif state == "absent":
             args.append("--absent")
 
-        for k, v in self.task["dnf"].items():
-            if k not in ("name", "state"):
-                raise ValueError(f"Not implemented key in dnf task: {k}: {v}")
         dnf = [{"DNF": " ".join(args + pkgs)}]
         return dnf, task_args
+
+    def task_package(self, task_args):
+        """Parse package task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        return self.task_dnf(task_args)
+
+    def task_yum(self, task_args):
+        """Parse yum task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        return self.task_dnf(task_args)
 
     def task_setup(self, task_args):
         """Parse setup task.
