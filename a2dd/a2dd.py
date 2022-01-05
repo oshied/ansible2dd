@@ -581,6 +581,7 @@ class AnsiblePlay:
                 "tasks",
                 "pre_tasks",
                 "post_tasks",
+                "vars",
             ):
                 play_context.append(f"{part}: {self.playbook[part]}")
         return "\n".join(play_context)
@@ -603,6 +604,16 @@ class AnsiblePlay:
                         {
                             "NAME": f"Set playbook env value for {k}",
                             "ENV": f"{k} {v}",
+                        }
+                    )
+                )
+        if "vars" in self.playbook:
+            for k, v in self.playbook["vars"].items():
+                play_result.append(
+                    Map(
+                        {
+                            "NAME": f"Set playbook arg value for {k}",
+                            "ARG": f"{k} {v}",
                         }
                     )
                 )
