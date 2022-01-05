@@ -156,3 +156,4 @@
       yum:
         name: '*'
         state: latest
+        exclude: ansible

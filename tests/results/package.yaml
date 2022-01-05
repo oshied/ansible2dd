@@ -17,3 +17,6 @@
 - NAME: Remove tripleo-repos
   DNF: --absent python*tripleo-repos
 
+- NAME: Remove tripleo-repos
+  DNF: --exclude "ansible-core" --latest ansible
+

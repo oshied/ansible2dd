@@ -32,3 +32,10 @@
   package:
     name: "python*tripleo-repos"
     state: absent
+
+- name: "Remove tripleo-repos"
+  dnf:
+    name:
+      - ansible
+    state: latest
+    exclude: ansible-core
