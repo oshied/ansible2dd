@@ -59,6 +59,13 @@
     mode: '0644'
     backup: true
 
+- name: Copying key info to octavia if not already there
+  copy:
+    src: "{{ item }}"
+    dest: "{{ octavia_confd_prefix }}/{{ item.path }}"
+    selevel: s0
+    setype: svirt_sandbox_file_t
+
 # - name: generate playbook to run
 #   copy:
 #     dest: "{{thales_rfs_playbook}}"

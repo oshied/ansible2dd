@@ -87,6 +87,8 @@
         src: "{{ source_file }}"
         backup: true
         dest: "{{ output_env_file }}"
+        selevel: s0
+        setype: svirt_sandbox_file_t
 
     -  set_fact:
         varia: 12345
