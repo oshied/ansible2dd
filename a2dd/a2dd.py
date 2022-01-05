@@ -200,14 +200,19 @@ class AnsibleTask:
         pkgs = task["name"]
         state = task.get("state", "present")
         state = states_map.get(state, state)
+        exclude = task.get("exclude", "")
+        if exclude:
+            exclude = f'--exclude "{exclude}"'
         for k, v in task.items():
-            if k not in ("name", "state"):
+            if k not in ("name", "state", "exclude"):
                 raise ValueError(f"Not implemented key in dnf task: {k}: {v}")
         if pkgs == "*" and state == "latest":
-            return [{"RUN": "dnf update -y"}], task_args
+            return [{"RUN": f"dnf update -y {exclude}"}], task_args
 
         if isinstance(pkgs, str):
             pkgs = [pkgs]
+        if exclude:
+            args.append(exclude)
         if state == "latest":
             args.append("--latest")
         elif state == "absent":

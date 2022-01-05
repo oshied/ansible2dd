@@ -215,5 +215,5 @@
 # TASK-CONTEXT:
 # when: (step | int) == 3
   - NAME: Update all packages
-    RUN: dnf update -y
+    RUN: dnf update -y --exclude "ansible"
 
