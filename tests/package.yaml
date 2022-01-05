@@ -1,0 +1,34 @@
+- name: install tmpwatch on the host
+  package:
+    name: tmpwatch
+    state: installed
+
+- name: make sure package presents
+  package:
+    name:
+      - qemu-kvm-common
+      - kvm
+    state: present
+
+- package:
+    name:
+      - openstack-nova-compute
+      - python-nova
+    state: removed
+
+- name: Ensure packages required
+  package:
+    name:
+      - python2-neutronclient
+      - python2-openstackclient
+      - openssl
+
+- name: Ensure Aide is installed and updated
+  package:
+    name: "{{ aide_system_packages }}"
+    state: latest
+
+- name: "Remove tripleo-repos"
+  package:
+    name: "python*tripleo-repos"
+    state: absent

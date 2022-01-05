@@ -82,17 +82,13 @@
 ## PLAYBOOK-CONTEXT:
 # vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
 # TASK-CONTEXT:
-# name: Install dnsmasq and bind-utils
-# package:
-#   name: '{{ packages }}'
-#   state: present
 # vars:
 #   packages:
 #   - dnsmasq
 #   - bind-utils
 
   - NAME: Install dnsmasq and bind-utils
-    ECHO: Conversion of task module 'package' is not implemented yet!
+    DNF: '{{ packages }}'
 
 ## PLAYBOOK-CONTEXT:
 # vars: ordereddict([('someplaybook', 'value'), ('playvar2', 'value2')])
@@ -202,6 +198,22 @@
 #   src: image-serve.conf.j2
 #   dest: /etc/httpd/conf.d/image-serve.conf
 # register: tripleo_image_serve_config_result
+# failed_when: false
   - NAME: manage /etc/httpd/conf.d/image-serve.conf
     ECHO: Conversion of task module 'template' is not implemented yet!
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# failed_when: false
+# when: step|int == 2
+  - NAME: Remove openstack-nova-compute and python-nova package during upgrade
+    DNF: --absent openstack-nova-compute python-nova
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# when: (step | int) == 3
+  - NAME: Update all packages
+    RUN: dnf update -y
 
