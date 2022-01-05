@@ -39,3 +39,10 @@
 - NAME: copy new lvm.conf in place
   RUN: chmod -R 0644 /etc/lvm/lvm.conf
 
+- NAME: Copying key info to octavia if not already there
+  COPY: '{{ item }} {{ octavia_confd_prefix }}/{{ item.path }}'
+
+- NAME: Copying key info to octavia if not already there
+  SECONTEXT: --selevel s0 --setype svirt_sandbox_file_t {{ octavia_confd_prefix }}/{{
+    item.path }}
+

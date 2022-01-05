@@ -111,6 +111,11 @@
 ## PLAYBOOK-CONTEXT:
 # become: True
   - NAME: Unnamed task
+    SECONTEXT: --selevel s0 --setype svirt_sandbox_file_t {{ output_env_file }}
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Unnamed task
     ARG: varia "12345"
 
 ## PLAYBOOK-CONTEXT:

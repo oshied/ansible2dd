@@ -351,6 +351,7 @@ class AnsibleTask:
         group = self.task["copy"].get("group")
         selevel = self.task["copy"].get("selevel")
         setype = self.task["copy"].get("setype")
+        seuser = self.task["copy"].get("seuser")
         backup = self.task["copy"].get("backup")
         if backup:
             backup = "backup"
@@ -407,8 +408,16 @@ class AnsibleTask:
                 if not content:
                     raise ValueError("No src or content in copy task")
 
-        if selevel or setype:
-            pass
+        if selevel or setype or seuser:
+            seargs = []
+            if selevel:
+                seargs.append(f"--selevel {selevel}")
+            if setype:
+                seargs.append(f"--setype {setype}")
+            if seuser:
+                seargs.append(f"--seuser {seuser}")
+            sec = [{"SECONTEXT": " ".join(seargs + [dest])}]
+            copy += sec
         return copy, task_args
 
 
