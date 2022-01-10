@@ -66,6 +66,13 @@
     selevel: s0
     setype: svirt_sandbox_file_t
 
+- name: "Populate the file in {{ sensubility_sudoers_file }}"
+  copy:
+    src: "{{ path_of_sudoers_file }}"
+    dest: "{{ sensubility_sudoers_file }}"
+    mode: 0440
+    validate: 'visudo -c -f %s'
+
 # - name: generate playbook to run
 #   copy:
 #     dest: "{{thales_rfs_playbook}}"

@@ -353,6 +353,7 @@ class AnsibleTask:
         setype = self.task["copy"].get("setype")
         seuser = self.task["copy"].get("seuser")
         backup = self.task["copy"].get("backup")
+        validate = self.task["copy"].get("validate")
         if backup:
             backup = "backup"
         content = self.task["copy"].get("content")
@@ -368,6 +369,14 @@ class AnsibleTask:
         elif owner or group:
             copyargs.append(f"--chown {owner or group}")
 
+        if validate:
+            backup = "backup"
+            validate = [{"RUN": f"{validate.replace('%s', dest + '.backup')}"}]
+            if self.task["copy"].get("backup") is None:
+                validate += [{"RUN": f"rm -f {dest + '.backup'}"}]
+        else:
+            validate = []
+
         if self.task["copy"].get("remote_src"):
             if src:
                 copy = [{"RUN": f"cp -r {src} {dest}"}]
@@ -380,8 +389,12 @@ class AnsibleTask:
                     copy.append({"RUN": f"chown -R {owner_group} {dest}"})
                 if mode:
                     copy.append({"RUN": f"chmod -R 0{mode:o} {dest}"})
-                if backup:
-                    copy = [{"RUN": f"cp -r {src} {dest}.{backup}"}] + copy
+                if backup or validate:
+                    copy = (
+                        [{"RUN": f"cp -r {src} {dest}.{backup}"}]
+                        + validate
+                        + copy
+                    )
 
             else:
 
@@ -396,14 +409,18 @@ class AnsibleTask:
                 if not force:
                     raise NotImplementedError("Force is not implemented yet")
                 copy = [{"COPY": " ".join(copyargs + [src, dest])}]
-                if backup:
-                    copy = [
-                        {
-                            "COPY": " ".join(
-                                copyargs + [src, f"{dest}.{backup}"]
-                            )
-                        }
-                    ] + copy
+                if backup or validate:
+                    copy = (
+                        [
+                            {
+                                "COPY": " ".join(
+                                    copyargs + [src, f"{dest}.{backup}"]
+                                )
+                            }
+                        ]
+                        + validate
+                        + copy
+                    )
             else:
                 if not content:
                     raise ValueError("No src or content in copy task")
