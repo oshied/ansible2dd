@@ -46,3 +46,15 @@
   SECONTEXT: --selevel s0 --setype svirt_sandbox_file_t {{ octavia_confd_prefix }}/{{
     item.path }}
 
+- NAME: Populate the file in {{ sensubility_sudoers_file }}
+  COPY: --chmod 0440 {{ path_of_sudoers_file }} {{ sensubility_sudoers_file }}.backup
+
+- NAME: Populate the file in {{ sensubility_sudoers_file }}
+  RUN: visudo -c -f {{ sensubility_sudoers_file }}.backup
+
+- NAME: Populate the file in {{ sensubility_sudoers_file }}
+  RUN: rm -f {{ sensubility_sudoers_file }}.backup
+
+- NAME: Populate the file in {{ sensubility_sudoers_file }}
+  COPY: --chmod 0440 {{ path_of_sudoers_file }} {{ sensubility_sudoers_file }}
+
