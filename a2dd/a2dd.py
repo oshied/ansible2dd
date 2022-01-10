@@ -420,6 +420,68 @@ class AnsibleTask:
             copy += sec
         return copy, task_args
 
+    def task_template(self, task_args):
+        """Parse template task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+        templargs = ["--blueprint"]
+        dest = self.task["template"]["dest"]
+        src = self.task["template"].get("src")
+        force = self.task["template"].get("force", True)
+        if not force:
+            raise NotImplementedError("Force is not implemented yet")
+        mode = self.task["template"].get("mode")
+        if isinstance(mode, str):
+            mode = int(mode, 8)
+        owner = self.task["template"].get("owner")
+        group = self.task["template"].get("group")
+        selevel = self.task["template"].get("selevel")
+        setype = self.task["template"].get("setype")
+        seuser = self.task["template"].get("seuser")
+        backup = self.task["template"].get("backup")
+        validate = self.task["template"].get("validate")
+        if backup:
+            backup = "backup"
+        if mode:
+            templargs.append(f"--chmod 0{mode:o}")
+        if owner and group:
+            templargs.append(f"--chown {owner}:{group}")
+        elif owner or group:
+            templargs.append(f"--chown {owner or group}")
+        if validate:
+            backup = "backup"
+            validate = [{"RUN": f"{validate.replace('%s', dest + '.backup')}"}]
+            if self.task["template"].get("backup") is None:
+                validate += [{"RUN": f"rm -f {dest + '.backup'}"}]
+        else:
+            validate = []
+
+        copy = [{"COPY": " ".join(templargs + [src, dest])}]
+        if backup or validate:
+            copy = (
+                [{"COPY": " ".join(templargs + [src, f"{dest}.{backup}"])}]
+                + validate
+                + copy
+            )
+
+        if selevel or setype or seuser:
+            seargs = []
+            if selevel:
+                seargs.append(f"--selevel {selevel}")
+            if setype:
+                seargs.append(f"--setype {setype}")
+            if seuser:
+                seargs.append(f"--seuser {seuser}")
+            sec = [{"SECONTEXT": " ".join(seargs + [dest])}]
+            copy += sec
+        return copy, task_args
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""

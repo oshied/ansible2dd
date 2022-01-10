@@ -188,14 +188,10 @@
 ## PLAYBOOK-CONTEXT:
 # become: True
 # TASK-CONTEXT:
-# name: manage /etc/httpd/conf.d/image-serve.conf
-# template:
-#   src: image-serve.conf.j2
-#   dest: /etc/httpd/conf.d/image-serve.conf
 # register: tripleo_image_serve_config_result
 # failed_when: false
   - NAME: manage /etc/httpd/conf.d/image-serve.conf
-    ECHO: Conversion of task module 'template' is not implemented yet!
+    COPY: --blueprint image-serve.conf.j2 /etc/httpd/conf.d/image-serve.conf
 
 ## PLAYBOOK-CONTEXT:
 # become: True
@@ -211,4 +207,12 @@
 # when: (step | int) == 3
   - NAME: Update all packages
     RUN: dnf update -y --exclude "ansible"
+
+## PLAYBOOK-CONTEXT:
+# become: True
+# TASK-CONTEXT:
+# become: true
+  - NAME: create ceph.conf
+    COPY: --blueprint --chmod 0644 --chown root:root templates/ceph_conf.j2 {{ tripleo_ceph_client_fetch_dir
+      }}/{{ tripleo_ceph_client_cluster | default('ceph') }}.conf
 

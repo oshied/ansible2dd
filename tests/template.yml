@@ -1,0 +1,39 @@
+- name: Adjust ssh server configuration
+  template:
+    dest: /etc/ssh/sshd_config
+    src: sshd_config_block.j2
+    validate: '/usr/sbin/sshd -T -f %s'
+  register: _sshd_config_result
+
+- name: Add sudoers file
+  template:
+    dest: /etc/sudoers
+    src: sudoers.j2
+    validate: 'visudo -c -f %s'
+    backup: true
+
+- name: Generate ReaR config file
+  template:
+    src: local.conf.j2
+    dest: /etc/rear/local.conf
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  tags:
+    - bar_setup_rear
+
+- name: generate named.conf
+  become: true
+  template:
+    src: named.conf.j2
+    dest: "{{ designate_named_conf_path}}/named.conf"
+
+- name: create rsyslog 10-octavia.conf
+  become: true
+  become_user: root
+  template:
+    src: templates/10-octavia.conf.j2
+    dest: "{{ octavia_confd_prefix }}/etc/rsyslog.d/10-octavia.conf"
+    selevel: s0
+    setype: svirt_sandbox_file_t
