@@ -1,0 +1,61 @@
+
+# TASK-CONTEXT:
+# register: _sshd_config_result
+- NAME: Adjust ssh server configuration
+  COPY: --blueprint sshd_config_block.j2 /etc/ssh/sshd_config.backup
+
+# TASK-CONTEXT:
+# register: _sshd_config_result
+- NAME: Adjust ssh server configuration
+  RUN: /usr/sbin/sshd -T -f /etc/ssh/sshd_config.backup
+
+# TASK-CONTEXT:
+# register: _sshd_config_result
+- NAME: Adjust ssh server configuration
+  RUN: rm -f /etc/ssh/sshd_config.backup
+
+# TASK-CONTEXT:
+# register: _sshd_config_result
+- NAME: Adjust ssh server configuration
+  COPY: --blueprint sshd_config_block.j2 /etc/ssh/sshd_config
+
+- NAME: Add sudoers file
+  COPY: --blueprint sudoers.j2 /etc/sudoers.backup
+
+- NAME: Add sudoers file
+  RUN: visudo -c -f /etc/sudoers.backup
+
+- NAME: Add sudoers file
+  COPY: --blueprint sudoers.j2 /etc/sudoers
+
+# TASK-CONTEXT:
+# tags:
+# - bar_setup_rear
+
+- NAME: Generate ReaR config file
+  COPY: --blueprint --chmod 0644 --chown root:root local.conf.j2 /etc/rear/local.conf.backup
+
+# TASK-CONTEXT:
+# tags:
+# - bar_setup_rear
+
+- NAME: Generate ReaR config file
+  COPY: --blueprint --chmod 0644 --chown root:root local.conf.j2 /etc/rear/local.conf
+
+# TASK-CONTEXT:
+# become: true
+- NAME: generate named.conf
+  COPY: --blueprint named.conf.j2 {{ designate_named_conf_path}}/named.conf
+
+# TASK-CONTEXT:
+# become: true
+# become_user: root
+- NAME: create rsyslog 10-octavia.conf
+  COPY: --blueprint templates/10-octavia.conf.j2 {{ octavia_confd_prefix }}/etc/rsyslog.d/10-octavia.conf
+
+# TASK-CONTEXT:
+# become: true
+# become_user: root
+- NAME: create rsyslog 10-octavia.conf
+  SECONTEXT: --selevel s0 --setype svirt_sandbox_file_t {{ octavia_confd_prefix }}/etc/rsyslog.d/10-octavia.conf
+
