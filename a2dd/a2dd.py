@@ -499,6 +499,97 @@ class AnsibleTask:
             copy += sec
         return copy, task_args
 
+    def task_file(self, task_args):
+        """Parse file task.
+
+        Args:
+            task_args (dict): task loaded from YAML
+
+        Returns:
+            tuple: (list, list) : List of DirectorD tasks as dictionaries with
+                                  list of unparsed lines as comments.
+        """
+
+        def get_shell_command(
+            mode=None,
+            owner=None,
+            group=None,
+            selevel=None,  # pylint: disable=W0613
+            setype=None,
+            seuser=None,  # pylint: disable=W0613
+            recurse=None,
+        ):
+            run = []
+            recurse = " -R" if recurse else ""
+            if mode:
+                run.append({"RUN": f"chmod{recurse} 0{mode:o} {path}"})
+            if owner or group:
+                owner_group = f"{owner or ''}:{group or ''}".rstrip(":")
+                run.append({"RUN": f"chown{recurse} {owner_group} {path}"})
+            if setype:
+                run.append({"RUN": f"chcon{recurse} -t {setype} {path}"})
+            return run
+
+        path = self.task["file"]["path"]
+        state = self.task["file"]["state"]
+        mode = self.task["file"].get("mode")
+        if isinstance(mode, str):
+            mode = int(mode, 8)
+        owner = self.task["file"].get("owner")
+        group = self.task["file"].get("group")
+        selevel = self.task["file"].get("selevel")
+        setype = self.task["file"].get("setype")
+        seuser = self.task["file"].get("seuser")
+        recurse = self.task["file"].get("recurse")
+        if state == "directory":
+            wrkdir_args = []
+            sec = []
+            if mode:
+                wrkdir_args.append(f"--chmod 0{mode:o}")
+            if owner and group:
+                wrkdir_args.append(f"--chown {owner}:{group}")
+            elif owner or group:
+                wrkdir_args.append(f"--chown {owner or group}")
+            if selevel or setype or seuser:
+                seargs = []
+                if selevel:
+                    seargs.append(f"--selevel {selevel}")
+                if setype:
+                    seargs.append(f"--setype {setype}")
+                if seuser:
+                    seargs.append(f"--seuser {seuser}")
+                sec = [{"SECONTEXT": " ".join(seargs + [path])}]
+            result = {"WORKDIR": f"{' '.join(wrkdir_args + [path]).lstrip()}"}
+            if not recurse:
+                return [result] + sec, task_args
+            else:
+                run = get_shell_command(
+                    mode=mode,
+                    owner=owner,
+                    group=group,
+                    selevel=selevel,
+                    setype=setype,
+                    seuser=seuser,
+                    recurse=True,
+                )
+                return [result] + sec + run, task_args
+        elif state == "absent":
+            return [{"RUN": f"rm -rf {path}"}], task_args
+        elif state == "touch":
+            result = [{"RUN": f"touch {path}"}]
+            run = get_shell_command(
+                mode=mode,
+                owner=owner,
+                group=group,
+                selevel=selevel,
+                setype=setype,
+                seuser=seuser,
+                recurse=recurse,
+            )
+            return result + run, task_args
+        else:
+            raise NotImplementedError(f"Not implemented file state {state}")
+
 
 class AnsibleBlock:
     """AnsibleBlock class parses a single tasks block."""

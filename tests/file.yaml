@@ -1,0 +1,64 @@
+- name: ensure ceph configurations exist
+  ansible.builtin.file:
+    path: /etc/ceph
+    state: directory
+
+- name: create persistent directories
+  file:
+    path: "{{ path }}"
+    state: directory
+    setype: "{{ setype }}"
+    seuser: user_x
+
+- name: Ensure directory owner and group
+  file:
+    path: /etc/ceph
+    state: directory
+    owner: root
+    group: root
+
+- name: Ensure directory owner
+  file:
+    path: /etc/ceph
+    state: directory
+    owner: 0
+
+- name: Ensure directory group
+  file:
+    path: /etc/ceph
+    state: directory
+    group: '1000'
+
+- name: Create hieradata directory
+  file:
+    path: "{{ ansible_user_dir }}/hieradata"
+    state: directory
+    mode: '0755'
+
+- name: Ensure directory owner and group, recursive
+  file:
+    path: /var/html
+    state: directory
+    group: web
+    mode: 0777
+    recurse: true
+
+- name: create directory {{ tripleo_ovn_cluster_config_basedir }}
+  ansible.builtin.file:
+    path: "{{ tripleo_ovn_cluster_config_basedir }}/etc/sysconfig"
+    recurse: true
+    state: directory
+    selevel: s0
+    setype: container_file_t
+
+- name: Removing existing directory
+  file:
+    path: /tmp/mydirectiry
+    state: absent
+
+- name: create an empty post-deploy.conf file if it does not exist
+  file:
+    path: /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+    state: touch
+    setype: container_file_t
+    mode: '0755'
