@@ -821,16 +821,19 @@ class AnsiblePlay:
         return play_dict
 
 
-def vars_parse(vars_path=None):
+def vars_parse(vars_content=None):
     """Parse vars file.
 
     Args:
         vars_path (str, optional): Path to vars file. Defaults to None.
 
-    Raises:
-        NotImplementedError: for now
+    Returns:
+        result (list): List of maps with parsed vars.
     """
-    raise NotImplementedError("Vars parsing is not supported yet!")
+    result = []
+    for var in vars_content:
+        result.append({"ARG": f"{var} {vars_content[var]}"})
+    return [{"jobs": result}]
 
 
 def role_parse(role_path=None):
@@ -866,5 +869,5 @@ def parse_file(file_path):
                     t = AnsibleTask(i)
                     result.extend(t.parse())
         if isinstance(ansible_file, dict):
-            result.append(vars_parse(ansible_file))
+            result.extend(vars_parse(ansible_file))
     return result
