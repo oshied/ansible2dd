@@ -1,0 +1,53 @@
+
+- NAME: ensure ceph configurations exist
+  WORKDIR: /etc/ceph
+
+- NAME: create persistent directories
+  WORKDIR: '{{ path }}'
+
+- NAME: create persistent directories
+  SECONTEXT: --setype {{ setype }} --seuser user_x {{ path }}
+
+- NAME: Ensure directory owner and group
+  WORKDIR: --chown root:root /etc/ceph
+
+- NAME: Ensure directory owner
+  WORKDIR: /etc/ceph
+
+- NAME: Ensure directory group
+  WORKDIR: --chown 1000 /etc/ceph
+
+- NAME: Create hieradata directory
+  WORKDIR: --chmod 0755 {{ ansible_user_dir }}/hieradata
+
+- NAME: Ensure directory owner and group, recursive
+  WORKDIR: --chmod 0777 --chown web /var/html
+
+- NAME: Ensure directory owner and group, recursive
+  RUN: chmod -R 0777 /var/html
+
+- NAME: Ensure directory owner and group, recursive
+  RUN: chown -R :web /var/html
+
+- NAME: create directory {{ tripleo_ovn_cluster_config_basedir }}
+  WORKDIR: '{{ tripleo_ovn_cluster_config_basedir }}/etc/sysconfig'
+
+- NAME: create directory {{ tripleo_ovn_cluster_config_basedir }}
+  SECONTEXT: --selevel s0 --setype container_file_t {{ tripleo_ovn_cluster_config_basedir
+    }}/etc/sysconfig
+
+- NAME: create directory {{ tripleo_ovn_cluster_config_basedir }}
+  RUN: chcon -R -t container_file_t {{ tripleo_ovn_cluster_config_basedir }}/etc/sysconfig
+
+- NAME: Removing existing directory
+  RUN: rm -rf /tmp/mydirectiry
+
+- NAME: create an empty post-deploy.conf file if it does not exist
+  RUN: touch /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+- NAME: create an empty post-deploy.conf file if it does not exist
+  RUN: chmod 0755 /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+- NAME: create an empty post-deploy.conf file if it does not exist
+  RUN: chcon -t container_file_t /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+

@@ -216,3 +216,53 @@
     COPY: --blueprint --chmod 0644 --chown root:root templates/ceph_conf.j2 {{ tripleo_ceph_client_fetch_dir
       }}/{{ tripleo_ceph_client_cluster | default('ceph') }}.conf
 
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: touch /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: chmod 0755 /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: chown :docker /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: chcon -t container_file_t /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Create hieradata directory
+    WORKDIR: --chmod 0755 /etc/hieradata
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Create hieradata directory
+    RUN: chmod -R 0755 /etc/hieradata
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: Removing existing directory
+    RUN: rm -rf /tmp/mydirectiry
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: touch /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: chmod 0755 /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
+## PLAYBOOK-CONTEXT:
+# become: True
+  - NAME: create an empty post-deploy.conf file if it does not exist
+    RUN: chcon -t container_file_t /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
+
