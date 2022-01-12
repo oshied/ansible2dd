@@ -1,0 +1,14 @@
+- jobs:
+  - ARG: openstack_bin openstack
+  - ARG: tripleo_overcloud_node_extract_provisioned_debug False
+  - ARG: tripleo_overcloud_node_extract_provisioned_home_dir {{ ansible_env.HOME }}
+  - ARG: tripleo_overcloud_node_extract_provisioned_log_combine True
+  - ARG: tripleo_overcloud_node_extract_provisioned_log_output True
+  - ARG: tripleo_overcloud_node_extract_provisioned_os_cloud {{ tripleo_os_cloud |
+      default('') }}
+  - ARG: tripleo_overcloud_node_extract_provisioned_number 12345
+  - ARG: tripleo_overcloud_node_extract_provisioned_overwrite_action error
+  - ARG: tripleo_overcloud_node_extract_provisioned_rc_file {{ tripleo_rc_file | default(ansible_env.HOME
+      ~ '/stackrc') }}
+  - ARG: tripleo_overcloud_node_extract_provisioned_stack None
+
