@@ -11,11 +11,12 @@
 #   WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #   License for the specific language governing permissions and limitations
 #   under the License.
+import os
 
 from ruamel.yaml.comments import CommentedMap as Map
 
 from a2dd.constants import BLOCK_ATTRS, PLAYBOOK_ATTRS, TASK_ATTRS
-from a2dd.utils import get_task_action, yaml_dump, yaml_load, string2dict
+from a2dd.utils import get_task_action, string2dict, yaml_dump, yaml_load
 
 
 class AnsibleTask:
@@ -53,7 +54,9 @@ class AnsibleTask:
             new_task_module = task_module.split(".")[-1]
             self.task[new_task_module] = self.task.pop(task_module)
             task_module = new_task_module
-        if isinstance(self.task[task_module], str):
+        if isinstance(self.task[task_module], str) and (
+            task_module not in ("command", "shell", "include_vars")
+        ):
             self.task[task_module] = string2dict(self.task[task_module])
         if task_module in ("block", "include", "include_tasks"):
             raise ValueError(
@@ -675,7 +678,7 @@ class AnsibleBlock:
 class AnsibleIncludeTasks:
     """AnsibleIncludeTasks class parses a tasks file from include block."""
 
-    def __init__(self, include, **kwargs):
+    def __init__(self, include, prefix=None, **kwargs):
         """Parse included file of tasks, passing all context argument to tasks.
 
         Args:
@@ -683,6 +686,7 @@ class AnsibleIncludeTasks:
         """
         self.include = include
         self.kwargs = kwargs
+        self.prefix = prefix
 
     def add_context(self):
         """Add inlcude context - all options which we don't parse currently.
@@ -722,6 +726,8 @@ class AnsibleIncludeTasks:
         tasks_file = self.include.get("include") or self.include.get(
             "include_tasks"
         )
+        if self.prefix:
+            tasks_file = os.path.join(self.prefix, tasks_file)
         with open(tasks_file, "r", encoding="utf-8") as f:
             tasks = yaml_load(f)
         result = AnsibleTasksList(
@@ -733,7 +739,7 @@ class AnsibleIncludeTasks:
 class AnsibleTasksList:
     """AnsibleTasksList class parses any list of tasks."""
 
-    def __init__(self, tasks, **kwargs):
+    def __init__(self, tasks, prefix=None, **kwargs):
         """Parse a list of tasks, passing all context arguments to tasks.
 
         Args:
@@ -741,6 +747,7 @@ class AnsibleTasksList:
         """
         self.tasks = tasks
         self.kwargs = kwargs
+        self.prefix = prefix
 
     def parse(self):
         """Parse a list of tasks and return a flattened list.
@@ -758,7 +765,9 @@ class AnsibleTasksList:
                 or "include_tasks" in task
                 or "import_tasks" in task
             ):
-                incl = AnsibleIncludeTasks(task, **self.kwargs)
+                incl = AnsibleIncludeTasks(
+                    task, prefix=self.prefix, **self.kwargs
+                )
                 result.extend(incl.parse())
             else:
                 task_repr = AnsibleTask(task, **self.kwargs)
@@ -874,10 +883,35 @@ def role_parse(role_path=None):
     Args:
         role_path (str, optional): Path to role. Defaults to None.
 
-    Raises:
-        NotImplementedError: for now
+    Returns:
+        list: List of maps with parsed tasks.
     """
-    raise NotImplementedError("Roles parsing is not supported yet!")
+    result = []
+    vars = [
+        os.path.join(role_path, "defaults"),
+        # vars are usually included by condition, they'are not in DD yet
+        os.path.join(role_path, "vars"),
+    ]
+    tasks = [os.path.join(role_path, "tasks")]
+    for var_path in vars:
+        for root, _, files in os.walk(var_path, topdown=False):
+            for name in files:
+                with open(
+                    os.path.join(root, name), "r", encoding="utf-8"
+                ) as f:
+                    content = yaml_load(f)
+                    result.extend(vars_parse(content)[0]["jobs"])
+    for tasks_path in tasks:
+        for root, _, files in os.walk(tasks_path, topdown=False):
+            for name in files:
+                with open(
+                    os.path.join(root, name), "r", encoding="utf-8"
+                ) as g:
+                    content = yaml_load(g)
+                    result.extend(
+                        AnsibleTasksList(content, prefix=root).parse()
+                    )
+    return result
 
 
 def parse_file(file_path):
