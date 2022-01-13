@@ -887,13 +887,13 @@ def role_parse(role_path=None):
         list: List of maps with parsed tasks.
     """
     result = []
-    vars = [
+    vars_ = [
         os.path.join(role_path, "defaults"),
         # vars are usually included by condition, they'are not in DD yet
         os.path.join(role_path, "vars"),
     ]
     tasks = [os.path.join(role_path, "tasks")]
-    for var_path in vars:
+    for var_path in vars_:
         for root, _, files in os.walk(var_path, topdown=False):
             for name in files:
                 with open(
