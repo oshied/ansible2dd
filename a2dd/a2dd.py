@@ -890,9 +890,13 @@ def role_parse(role_path=None):
     vars_ = [
         os.path.join(role_path, "defaults"),
         # vars are usually included by condition, they'are not in DD yet
-        os.path.join(role_path, "vars"),
+        # os.path.join(role_path, "vars"),
     ]
-    tasks = [os.path.join(role_path, "tasks")]
+    tasks = os.path.join(role_path, "tasks")
+    tasks_main = [
+        os.path.join(tasks, "main.yml"),
+        os.path.join(tasks, "main.yaml"),
+    ]
     for var_path in vars_:
         for root, _, files in os.walk(var_path, topdown=False):
             for name in files:
@@ -901,16 +905,11 @@ def role_parse(role_path=None):
                 ) as f:
                     content = yaml_load(f)
                     result.extend(vars_parse(content)[0]["jobs"])
-    for tasks_path in tasks:
-        for root, _, files in os.walk(tasks_path, topdown=False):
-            for name in files:
-                with open(
-                    os.path.join(root, name), "r", encoding="utf-8"
-                ) as g:
-                    content = yaml_load(g)
-                    result.extend(
-                        AnsibleTasksList(content, prefix=root).parse()
-                    )
+    for tasks_path in tasks_main:
+        if os.path.isfile(tasks_path):
+            with open(tasks_path, "r", encoding="utf-8") as g:
+                content = yaml_load(g)
+                result.extend(AnsibleTasksList(content, prefix=tasks).parse())
     return result
 
 
