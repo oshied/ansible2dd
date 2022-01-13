@@ -518,20 +518,40 @@ class AnsibleTask:
             setype=None,
             seuser=None,  # pylint: disable=W0613
             recurse=None,
+            path=None,
+            condition_start="",
+            condition_end="",
         ):
             run = []
             recurse = " -R" if recurse else ""
             if mode:
-                run.append({"RUN": f"chmod{recurse} 0{mode:o} {path}"})
+                run.append(
+                    {
+                        "RUN": (
+                            f"{condition_start}chmod{recurse} 0{mode:o} "
+                            f"{path}{condition_end}"
+                        )
+                    }
+                )
             if owner or group:
                 owner_group = f"{owner or ''}:{group or ''}".rstrip(":")
-                run.append({"RUN": f"chown{recurse} {owner_group} {path}"})
+                run.append(
+                    {
+                        "RUN": f"{condition_start}chown{recurse} {owner_group}"
+                        f" {path}{condition_end}"
+                    }
+                )
             if setype:
-                run.append({"RUN": f"chcon{recurse} -t {setype} {path}"})
+                run.append(
+                    {
+                        "RUN": f"{condition_start}chcon{recurse} -t {setype} "
+                        f"{path}{condition_end}"
+                    }
+                )
             return run
 
         path = self.task["file"]["path"]
-        state = self.task["file"]["state"]
+        state = self.task["file"].get("state", "file")
         mode = self.task["file"].get("mode")
         if isinstance(mode, str):
             mode = int(mode, 8)
@@ -571,12 +591,21 @@ class AnsibleTask:
                     setype=setype,
                     seuser=seuser,
                     recurse=True,
+                    path=path,
                 )
                 return [result] + sec + run, task_args
         elif state == "absent":
             return [{"RUN": f"rm -rf {path}"}], task_args
-        elif state == "touch":
-            result = [{"RUN": f"touch {path}"}]
+        elif state in ("touch", "file"):
+            if state == "file":
+                condition_start = f"if [ -e {path} ]; then "
+                condition_end = "; fi"
+            else:
+                condition_start = condition_end = ""
+            if state == "touch":
+                result = [{"RUN": f"touch {path}"}]
+            else:
+                result = []
             run = get_shell_command(
                 mode=mode,
                 owner=owner,
@@ -585,6 +614,9 @@ class AnsibleTask:
                 setype=setype,
                 seuser=seuser,
                 recurse=recurse,
+                path=path,
+                condition_start=condition_start,
+                condition_end=condition_end,
             )
             return result + run, task_args
         else:

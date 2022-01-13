@@ -62,3 +62,8 @@
     state: touch
     setype: container_file_t
     mode: '0755'
+
+- name: Set setype on /etc/multipath.conf
+  file:
+    path: /etc/multipath.conf
+    setype: container_file_t
