@@ -51,3 +51,7 @@
 - NAME: create an empty post-deploy.conf file if it does not exist
   RUN: chcon -t container_file_t /var/lib/config-data/puppet-generated/octavia/etc/octavia/post-deploy.conf
 
+- NAME: Set setype on /etc/multipath.conf
+  RUN: if [ -e /etc/multipath.conf ]; then chcon -t container_file_t /etc/multipath.conf;
+    fi
+
