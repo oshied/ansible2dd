@@ -37,3 +37,17 @@ jobs:
           a2dd -f $play > /tmp/$file;
           diff -bB tests/results/$file /tmp/$file;
         done
+
+    - name: Run tests for roles
+      run: |
+        for role in $(ls tests/roles/); do
+          a2dd -r tests/roles/${role} > /tmp/${role}.yaml;
+          diff -bB tests/results/${role}_role.yaml /tmp/${role}.yaml;
+        done
+
+    - name: Upload artifacts on failure
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: functional-ansible2dd
+        path: /tmp/*.yaml

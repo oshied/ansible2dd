@@ -1,0 +1,191 @@
+- ARG: tripleo_container_cli {{ container_cli | default('podman') }}
+- ARG: 'tripleo_multipathd_custom_config_file '
+- ARG: tripleo_multipathd_enable True
+- ARG: tripleo_multipathd_find_multipaths True
+- ARG: tripleo_multipathd_skip_kpartx True
+- ARG: tripleo_multipathd_user_friendly_names False
+
+# TASK-CONTEXT:
+# name: Note the previous multipath configuration
+# stat:
+#   path: /etc/multipath.conf
+# register: stat_before
+# check_mode: false
+- NAME: Note the previous multipath configuration
+  ECHO: Conversion of task module 'stat' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# when:
+# - ansible_facts.selinux is undefined
+- NAME: Gather SELinux fact if needed
+  FACTER: ''
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# name: Create fcontext entry for multipath locations
+# when:
+# - ansible_facts.selinux.status == "enabled"
+# sefcontext:
+#   target: /etc/multipath.conf
+#   setype: container_file_t
+#   state: present
+- NAME: Create fcontext entry for multipath locations
+  ECHO: Conversion of task module 'sefcontext' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# when:
+# - tripleo_multipathd_custom_config_file|length > 0
+
+- NAME: Install custom multipath.conf if one is specified
+  COPY: --chmod 0644 {{ tripleo_multipathd_custom_config_file }} /etc/multipath.conf
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+## BLOCK-CONTEXT:
+# name: Ensure /etc/multipath.conf exists
+# when: ['tripleo_multipathd_custom_config_file|length == 0']
+# TASK-CONTEXT:
+# name: Check for existing /etc/multipath.conf
+# stat:
+#   path: /etc/multipath.conf
+# register: result
+# check_mode: false
+- NAME: Check for existing /etc/multipath.conf
+  ECHO: Conversion of task module 'stat' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+## BLOCK-CONTEXT:
+# name: Ensure /etc/multipath.conf exists
+# when: ['tripleo_multipathd_custom_config_file|length == 0']
+# TASK-CONTEXT:
+# when:
+# - not result.stat.exists or result.stat.size == 0
+
+- NAME: Create /etc/multipath.conf if file is missing
+  COPY: --chmod 0644 {{ role_path }}/files/multipath.conf /etc/multipath.conf
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+- NAME: Set setype on /etc/multipath.conf
+  RUN: if [ -e /etc/multipath.conf ]; then chcon -t container_file_t /etc/multipath.conf;
+    fi
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# name: Ensure a blacklist section is present
+# lineinfile:
+#   path: /etc/multipath.conf
+#   regexp: ^blacklist
+#   line: blacklist {
+# register: blacklist_section
+- NAME: Ensure a blacklist section is present
+  ECHO: Conversion of task module 'lineinfile' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# name: Terminate the blacklist section if one was added
+# replace:
+#   path: /etc/multipath.conf
+#   regexp: ^(blacklist {)
+#   replace: \1\n}
+# when:
+# - blacklist_section.changed
+
+- NAME: Terminate the blacklist section if one was added
+  ECHO: Conversion of task module 'replace' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# name: Remove global blacklist if multipathd is enabled
+# replace:
+#   path: /etc/multipath.conf
+#   regexp: ^blacklist {\n[\s]+devnode \"\.\*\"
+#   replace: blacklist {
+# when:
+# - tripleo_multipathd_enable | bool
+
+- NAME: Remove global blacklist if multipathd is enabled
+  ECHO: Conversion of task module 'replace' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# name: Add global blacklist if multipathd is disabled
+# lineinfile:
+#   path: /etc/multipath.conf
+#   insertafter: ^blacklist
+#   regexp: ^[\s]+devnode \"\.\*\"
+#   line: '        devnode ".*"'
+# when:
+# - not (tripleo_multipathd_enable|bool)
+
+- NAME: Add global blacklist if multipathd is disabled
+  ECHO: Conversion of task module 'lineinfile' is not implemented yet!
+
+## INCLUDE-CONTEXT:
+# name: Configure multipath
+# TASK-CONTEXT:
+# name: Configure /etc/multipath.conf variables
+# lineinfile:
+#   path: /etc/multipath.conf
+#   insertafter: ^defaults
+#   firstmatch: true
+#   regexp: ^\s+{{ item.var }}
+#   line: "        {{ item.var }} {{ (item.value|bool) | ternary('yes', 'no') }}"
+# loop:
+# - {var: find_multipaths, value: '{{tripleo_multipathd_find_multipaths}}'}
+# - {var: skip_kpartx, value: '{{tripleo_multipathd_skip_kpartx}}'}
+# - {var: user_friendly_names, value: '{{tripleo_multipathd_user_friendly_names}}'}
+# loop_control:
+#   index_var: multipath_var_index
+- NAME: Configure /etc/multipath.conf variables
+  ECHO: Conversion of task module 'lineinfile' is not implemented yet!
+
+# TASK-CONTEXT:
+# name: Check the new multipath configuration
+# stat:
+#   path: /etc/multipath.conf
+# register: stat_after
+# check_mode: false
+- NAME: Check the new multipath configuration
+  ECHO: Conversion of task module 'stat' is not implemented yet!
+
+## BLOCK-CONTEXT:
+# name: Update containers when the multipath configuration changes
+# when: ['not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum']
+# become: True
+# TASK-CONTEXT:
+# register: multipath_conf_containers
+# changed_when: false
+- NAME: Identify containers using /etc/multipath.conf
+  RUN: "{{ tripleo_container_cli }} ps --filter volume=/etc/multipath.conf --format\
+    \ {{ '{{' }}.Names{{ '}}' }}"
+
+## BLOCK-CONTEXT:
+# name: Update containers when the multipath configuration changes
+# when: ['not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum']
+# become: True
+# TASK-CONTEXT:
+# loop: '{{ multipath_conf_containers.stdout_lines | default([]) }}'
+- NAME: Refresh their /etc/multipath.conf
+  RUN: '{{ tripleo_container_cli }} cp /etc/multipath.conf {{ item }}:/etc/'
+
+## BLOCK-CONTEXT:
+# name: Update containers when the multipath configuration changes
+# when: ['not stat_before.stat.exists or stat_after.stat.checksum != stat_before.stat.checksum']
+# become: True
+# TASK-CONTEXT:
+# when:
+# - "'multipathd' in multipath_conf_containers.stdout | default('')"
+- NAME: Restart multipathd
+  RUN: '{{ tripleo_container_cli }} restart multipathd'
+
