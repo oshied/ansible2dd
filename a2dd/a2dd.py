@@ -926,13 +926,15 @@ def parse_file(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         ansible_file = yaml_load(f)
         if isinstance(ansible_file, list):
-            for i in ansible_file:
-                if "hosts" in i:
+            if "hosts" in ansible_file[0]:
+                # Parse the playbook
+                for i in ansible_file:
                     play = AnsiblePlay(i)
                     result.append(play.parse())
-                else:
-                    t = AnsibleTask(i)
-                    result.extend(t.parse())
+            else:
+                # Parse the tasks list
+                t = AnsibleTasksList(ansible_file)
+                result.extend(t.parse())
         if isinstance(ansible_file, dict):
             result.extend(vars_parse(ansible_file))
     return result
